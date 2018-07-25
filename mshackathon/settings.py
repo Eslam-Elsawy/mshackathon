@@ -25,7 +25,7 @@ SECRET_KEY = 'u(wj-5)am&ns!cfujr_bfc(v@*v)y6tbk8rmkut0smi*laion7'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['eslamashraf.pythonanywhere.com']
 
 
 # Application definition
@@ -69,7 +69,9 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'mshackathon.wsgi.application'
-
+STATICFILES_DIRS = (
+    os.path.join(BASE_DIR, "mshackathon/static"),
+)
 
 # Database
 # https://docs.djangoproject.com/en/2.0/ref/settings/#databases
@@ -119,3 +121,5 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.0/howto/static-files/
 
 STATIC_URL = '/static/'
+
+STATIC_ROOT = '/home/eslamashraf/mshackathon/static'
