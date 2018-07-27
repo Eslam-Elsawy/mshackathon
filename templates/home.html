@@ -6,11 +6,36 @@
         <link rel="stylesheet" type="text/css" href="{% static 'main/styles.css' %}" />
         <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
         <script>
+            function analyze() {
+                console.log("analyzing text")
+
+                var input = {
+                    'text': $("#input_text_area").val(),
+                }
+
+                $.ajax({
+                    url: 'analyze/',
+                    type: 'POST',
+                    contentType: 'application/json; charset=utf-8',
+                    data: JSON.stringify(input),
+                    dataType: 'text',
+                    success: function (data) {
+                       $("#output_text_area").val(data);
+                    },
+                });
+            }
         </script>
     </head>
     <body>
         <div id ='title'>
-            <h1>MS Hackathon</h1>
+            <h1>NPS Tagger</h1>
+        </div>
+        <div>
+            <h3>Input</h3>
+            <textarea id="input_text_area" rows="15" cols="50"></textarea>
+            <button onclick="analyze();">Analyze</button>
+            <h3>Tags</h3>
+            <textarea id="output_text_area" rows="5" cols="50"></textarea>
         </div>
     </body>
 </html>
