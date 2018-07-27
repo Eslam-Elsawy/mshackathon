@@ -11,10 +11,6 @@ from sklearn.preprocessing import MultiLabelBinarizer
 from sklearn.ensemble  import RandomForestClassifier
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.pipeline import Pipeline
-import nltk
-nltk.download('all')
-from nltk.corpus import stopwords
-stop_words = set(stopwords.words('english'))
 
 classifier = None
 testsize = 0.1
@@ -89,7 +85,7 @@ def home(request):
         # classifier
         print("Training classifier")
         classifier = Pipeline([
-            ('tfidf', TfidfVectorizer(stop_words=stop_words)),
+            ('tfidf', TfidfVectorizer()),
             ('clf', RandomForestClassifier()),
         ])
         classifier.fit(X_train, Y_train_mlb)
