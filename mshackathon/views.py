@@ -157,13 +157,16 @@ def analyze(request):
                          'Naive Bayes Classifier']
     # predict
     prediction = ''
+    prediction_json = {}
     for classifier, classifiers_name in zip(classifiers, classifiers_names):
         print(classifiers_name)
         predicted = classifier.predict([comment])
         predicted_labels = mlb.inverse_transform(predicted)
-        predicted_labels_formatted = ",".join(predicted_labels[0])
+        predicted_labels_formatted = ", ".join(predicted_labels[0])
         prediction_str = classifiers_name + ": " + predicted_labels_formatted
         prediction = prediction + prediction_str + "\n"
+        prediction_json[classifiers_name] = predicted_labels_formatted
     print(prediction)
 
-    return HttpResponse(prediction)
+    json_response = json.dumps(prediction_json)
+    return HttpResponse(json_response)

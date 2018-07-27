@@ -20,7 +20,12 @@
                     data: JSON.stringify(input),
                     dataType: 'text',
                     success: function (data) {
-                       $("#output_text_area").val(data);
+                        var response = JSON.parse(data)
+                       document.getElementById("rf").innerHTML = response['Random Forest Classifier'];
+                       document.getElementById("et").innerHTML = response['Extra Trees Classifier'];
+                       document.getElementById("dt").innerHTML = response['Decision Tree Classifier'];
+                       document.getElementById("lr").innerHTML = response['Logistic Regression Classifier'];
+                       document.getElementById("nb").innerHTML = response['Naive Bayes Classifier'];
                     },
                 });
             }
@@ -32,10 +37,23 @@
         </div>
         <div>
             <h3>Input</h3>
-            <textarea id="input_text_area" rows="15" cols="50"></textarea>
+            <textarea id="input_text_area" rows="6" cols="90"></textarea>
             <button onclick="analyze();">Analyze</button>
-            <h3>Tags</h3>
-            <textarea id="output_text_area" rows="5" cols="50"></textarea>
+            <div>
+                <p><b>Random Forest Classifier:</b> <span id="rf"></span></p>
+            </div>
+            <div>
+                <p><b>Extra Trees Classifier:</b> <span id="et"></span></p>
+            </div>
+            <div>
+                <p><b>Decision Tree Classifier:</b> <span id="dt"></span></p>
+            </div>
+            <div>
+                <p><b>Logistic Regression Classifier:</b> <span id="lr"></span></p>
+            </div>
+            <div>
+                <p><b>Naive Bayes Classifier:</b> <span id="nb"></span></p>
+            </div>
         </div>
     </body>
 </html>
