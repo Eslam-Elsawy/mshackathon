@@ -11,6 +11,8 @@ from sklearn.preprocessing import MultiLabelBinarizer
 from sklearn.ensemble  import RandomForestClassifier
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.pipeline import Pipeline
+import nltk
+nltk.download('all')
 from nltk.corpus import stopwords
 stop_words = set(stopwords.words('english'))
 
