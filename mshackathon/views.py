@@ -12,6 +12,10 @@ from sklearn.ensemble  import RandomForestClassifier
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.pipeline import Pipeline
 
+import nltk
+nltk.download('stopwords')
+from nltk.corpus import stopwords
+
 classifier = None
 testsize = 0.1
 mlb = None
@@ -84,8 +88,9 @@ def home(request):
 
         # classifier
         print("Training classifier")
+        stop_words = set(stopwords.words('english'))
         classifier = Pipeline([
-            ('tfidf', TfidfVectorizer()),
+            ('tfidf', TfidfVectorizer(stop_words=stop_words)),
             ('clf', RandomForestClassifier()),
         ])
         classifier.fit(X_train, Y_train_mlb)
