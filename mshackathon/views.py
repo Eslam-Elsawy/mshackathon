@@ -6,26 +6,38 @@ import os
 from django.conf import settings
 import numpy as np
 import json
-from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import MultiLabelBinarizer
-from sklearn.ensemble  import RandomForestClassifier
+from sklearn.ensemble  import RandomForestClassifier as RandomForestClassifierAlgo
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.pipeline import Pipeline
+from sklearn.multiclass import OneVsRestClassifier
+from sklearn.naive_bayes import MultinomialNB as MultinomialNBAlgo
+from sklearn.ensemble import ExtraTreesClassifier as ExtraTreesClassifierAlgo
+from sklearn.tree import DecisionTreeClassifier as DecisionTreeClassifierAlgo
+from sklearn.linear_model import LogisticRegression as LogisticRegressionAlgo
 
 import nltk
 nltk.download('stopwords')
 from nltk.corpus import stopwords
 
-classifier = None
-testsize = 0.1
 mlb = None
+RandomForestClassifier = None
+ExtraTreesClassifier = None
+DecisionTreeClassifier = None
+LogisticRegression = None
+NB = None
 
 def home(request):
-    global classifier
-    global testsize
     global mlb
-    if not classifier:
-        print("loading classifier")
+    global RandomForestClassifier
+    global ExtraTreesClassifier
+    global DecisionTreeClassifier
+    global LogisticRegression
+    global NB
+    if not RandomForestClassifier:
+
+        stop_words = set(stopwords.words('english'))
+
         categories = ['Ease of use', 'Love it', 'Good', 'Hard to use', 'Useful', 'Pricing', 'Slow', 'Sharing',
                       'Feature Gap', 'Buggy', 'Too early', 'Refresh', 'Navigation', 'Foreign Language', 'Visuals',
                       'Export',
@@ -79,21 +91,52 @@ def home(request):
         DataX = np.array(DataX_list)
         DataY = np.array(DataY_list)
 
-        X_train, X_test, Y_train, Y_test = train_test_split(DataX, DataY, random_state=42, test_size=testsize)
-
-        # ---------------------
+        # # ---------------------
         # multi label binarization
         mlb = MultiLabelBinarizer()
-        Y_train_mlb = mlb.fit_transform(Y_train)
+        DataYmlb = mlb.fit_transform(DataY)
 
-        # classifier
-        print("Training classifier")
-        stop_words = set(stopwords.words('english'))
-        classifier = Pipeline([
+        # # training classifiers
+        # classifier 1 - RandomForestClassifier
+        RandomForestClassifier = Pipeline([
             ('tfidf', TfidfVectorizer(stop_words=stop_words)),
-            ('clf', RandomForestClassifier()),
+            ('clf', RandomForestClassifierAlgo()),
         ])
-        classifier.fit(X_train, Y_train_mlb)
+
+        # classifier 2 - ExtraTreesClassifier
+        ExtraTreesClassifier = Pipeline([
+            ('tfidf', TfidfVectorizer(stop_words=stop_words)),
+            ('clf', ExtraTreesClassifierAlgo()),
+        ])
+
+        # classifier 3 - DecisionTreeClassifier
+        DecisionTreeClassifier = Pipeline([
+            ('tfidf', TfidfVectorizer(stop_words=stop_words)),
+            ('clf', DecisionTreeClassifierAlgo()),
+        ])
+
+        # classifier 4 - LogisticRegression
+        LogisticRegression = Pipeline([
+            ('tfidf', TfidfVectorizer(stop_words=stop_words)),
+            ('clf', OneVsRestClassifier(LogisticRegressionAlgo(solver='sag'), n_jobs=1)),
+        ])
+
+        # classifier 5 - NB
+        NB = Pipeline([
+            ('tfidf', TfidfVectorizer(stop_words=stop_words)),
+            ('clf', OneVsRestClassifier(MultinomialNBAlgo(fit_prior=True, class_prior=None))),
+        ])
+
+        print("traing class RandomForestClassifier")
+        RandomForestClassifier.fit(DataX, DataYmlb)
+        print("traing class ExtraTreesClassifier")
+        ExtraTreesClassifier.fit(DataX, DataYmlb)
+        print("traing class DecisionTreeClassifier")
+        DecisionTreeClassifier.fit(DataX, DataYmlb)
+        print("traing class LogisticRegression")
+        LogisticRegression.fit(DataX, DataYmlb)
+        print("training class NB")
+        NB.fit(DataX, DataYmlb)
 
     else:
         print("classifiers already loaded ....")
@@ -107,11 +150,20 @@ def analyze(request):
     comment = json_data['text']
     print("Comment: " + json_data['text'])
 
+    classifiers = [RandomForestClassifier, ExtraTreesClassifier,
+                   DecisionTreeClassifier, LogisticRegression, NB]
+    classifiers_names = ['Random Forest Classifier', 'Extra Trees Classifier',
+                   'Decision Tree Classifier', 'Logistic Regression Classifier',
+                         'Naive Bayes Classifier']
     # predict
-    predicted = classifier.predict([comment])
-    predicted_labels = mlb.inverse_transform(predicted)
-    predicted_labels_formatted = ",".join(predicted_labels[0])
-    print("Predicted Labels: " + predicted_labels_formatted)
-    print(predicted_labels_formatted)
+    prediction = ''
+    for classifier, classifiers_name in zip(classifiers, classifiers_names):
+        print(classifiers_name)
+        predicted = classifier.predict([comment])
+        predicted_labels = mlb.inverse_transform(predicted)
+        predicted_labels_formatted = ",".join(predicted_labels[0])
+        prediction_str = classifiers_name + ": " + predicted_labels_formatted
+        prediction = prediction + prediction_str + "\n"
+    print(prediction)
 
-    return HttpResponse(predicted_labels_formatted)
+    return HttpResponse(prediction)
